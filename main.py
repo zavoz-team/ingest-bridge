@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from flask import Flask, jsonify
 
 from adapter.config.loader import load_config
+from adapter.otel.setup import setup_otel
 from domain.event import IngestEventEnvelope
 from usecase.ingest_event import IngestEvent
 
@@ -29,6 +30,7 @@ class _StubKafkaPublisher:
 
 def _create_app(ingest_event: IngestEvent, auth_verifier: _TokenSourceAuthVerifier) -> Flask:
     app = Flask(__name__)
+    setup_otel(app)
     app.config['ingest_event'] = ingest_event
     app.config['auth_verifier'] = auth_verifier
 
