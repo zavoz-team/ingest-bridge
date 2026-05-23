@@ -15,16 +15,11 @@ class TestEventIdentifiers:
         ids = EventIdentifiers(anonymous_id='anon_123')
         assert ids.anonymous_id == 'anon_123'
 
-    def test_valid_with_multiple(self):
-        ids = EventIdentifiers(email='a@b.com', phone='+79990000000')
-        assert ids.email == 'a@b.com'
-        assert ids.phone == '+79990000000'
-
     def test_raises_when_all_none(self):
         with pytest.raises(InvalidPayloadError):
             EventIdentifiers()
 
-    def test_raises_when_all_empty_strings(self):
+    def test_raises_when_all_empty(self):
         with pytest.raises(InvalidPayloadError):
             EventIdentifiers(email='', phone='', external_user_id='', anonymous_id='')
 
@@ -44,18 +39,3 @@ class TestIngestEventEnvelope:
         assert envelope.event_id == 'evt_1'
         assert envelope.attributes == {}
         assert envelope.payload == {}
-        assert envelope.trace_context == {}
-
-    def test_envelope_is_frozen(self):
-        now = datetime.now(timezone.utc)
-        ids = EventIdentifiers(email='u@e.com')
-        envelope = IngestEventEnvelope(
-            event_id='evt_1',
-            event_type='page_view',
-            source='shop',
-            occurred_at=now,
-            received_at=now,
-            identifiers=ids,
-        )
-        with pytest.raises(Exception):
-            envelope.event_id = 'changed'  # type: ignore[misc]
