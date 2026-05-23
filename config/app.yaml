@@ -1,0 +1,11 @@
+name: ingest-bridge
+env: development
+host: 0.0.0.0
+port: 8080
+
+source_token: ""
+
+kafka:
+  bootstrap_servers: localhost:9092
+  topic: cdp.events.v1
+  publish_timeout_seconds: 10
