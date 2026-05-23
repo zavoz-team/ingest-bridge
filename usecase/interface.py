@@ -6,6 +6,7 @@ from domain.event import IngestEventEnvelope
 
 class KafkaPublisher(Protocol):
     def publish(self, envelope: IngestEventEnvelope) -> None: ...
+    def ready(self) -> bool: ...
 
 
 class SourceAuthVerifier(Protocol):

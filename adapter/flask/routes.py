@@ -6,6 +6,7 @@ from opentelemetry.propagate import inject
 from adapter.flask.auth import require_auth
 from domain.error import InvalidPayloadError
 from usecase.ingest_event import IngestEvent
+from usecase.interface import KafkaPublisher
 
 bp = Blueprint('api', __name__)
 
@@ -32,4 +33,7 @@ def health_live() -> tuple[Any, int]:
 
 @bp.get('/health/ready')
 def health_ready() -> tuple[Any, int]:
+    publisher: KafkaPublisher = current_app.config['publisher']
+    if not publisher.ready():
+        return jsonify({'status': 'unavailable'}), 503
     return jsonify({'status': 'ready'}), 200

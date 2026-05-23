@@ -54,6 +54,14 @@ class KafkaPublisher:
             logger.exception('publish error')
             raise PublishError(f'publish error {e}') from e
 
+    def ready(self) -> bool:
+        # check kafka readiness
+        try:
+            self._producer.list_topics(timeout=1.0)
+            return True
+        except KafkaException:
+            return False
+
     def close(self) -> None:
         # close producer
         logger.info('closing producer')

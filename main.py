@@ -16,6 +16,9 @@ class _StubKafkaPublisher:
     def publish(self, envelope: IngestEventEnvelope) -> None:
         raise NotImplementedError
 
+    def ready(self) -> bool:
+        return True
+
 
 def main() -> None:
     config = load_config()
@@ -26,7 +29,7 @@ def main() -> None:
 
     ingest_event = IngestEvent(publisher=publisher, time_provider=time_provider)
 
-    app = create_app(ingest_event, auth_verifier)
+    app = create_app(ingest_event, auth_verifier, publisher)
     app.run(host=config.host, port=config.port)
 
 
