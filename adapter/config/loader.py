@@ -43,21 +43,15 @@ def load_config(yaml_path: Path | None = None) -> AppConfig:
             str(kafka_raw.get('topic', 'cdp.events.v1')),
         ),
         publish_timeout_seconds=int(
-            os.environ.get(
-                'INGEST_BRIDGE_KAFKA_PUBLISH_TIMEOUT_SECONDS',
-                kafka_raw.get('publish_timeout_seconds', 10),
-            )
+            os.environ.get('INGEST_BRIDGE_KAFKA_PUBLISH_TIMEOUT_SECONDS') or str(kafka_raw.get('publish_timeout_seconds', 10))
         ),
     )
 
     return AppConfig(
         name=str(raw.get('name', 'ingest-bridge')),
         env=str(raw.get('env', 'development')),
-        host=os.environ.get('INGEST_BRIDGE_HOST', str(raw.get('host', '0.0.0.0'))),
-        port=int(os.environ.get('INGEST_BRIDGE_PORT', raw.get('port', 8080))),
-        source_token=os.environ.get(
-            'INGEST_BRIDGE_SOURCE_TOKEN',
-            str(raw.get('source_token', '')),
-        ),
+        host=os.environ.get('INGEST_BRIDGE_HOST') or str(raw.get('host', '0.0.0.0')),
+        port=int(os.environ.get('INGEST_BRIDGE_PORT') or str(raw.get('port', 8080))),
+        source_token=os.environ.get('INGEST_BRIDGE_SOURCE_TOKEN') or str(raw.get('source_token', '')),
         kafka=kafka,
     )
