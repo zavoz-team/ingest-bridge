@@ -1,6 +1,7 @@
 services:
   kafka:
     image: apache/kafka:latest
+    hostname: kafka
     ports:
       - "9092:9092"
     environment:
@@ -40,20 +41,35 @@ services:
         echo "Topic cdp.events.v1 ready."
     restart: "no"
 
+  otel-collector:
+    image: grafana/otel-lgtm:latest
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - lgtm-data:/data
+
   ingest-bridge:
-    build: .
+    image: gglamer/ingest-bridge:latest
     ports:
       - "8080:8080"
     env_file:
       - .env
+    environment:
+      OTEL_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
     depends_on:
       kafka:
         condition: service_healthy
       init-kafka:
         condition: service_completed_successfully
+      otel-collector:
+        condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health/live || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+
+volumes:
+  lgtm-data:
