@@ -35,4 +35,6 @@ def register_error_handlers(app: Flask) -> None:
 
     @app.errorhandler(HTTPException)
     def handle_http_exception(error: HTTPException) -> tuple[Any, int]:
-        return jsonify({'error': error.name.lower().replace(' ', '_')}), error.code or 500
+        return jsonify(
+            {'error': error.name.lower().replace(' ', '_')}
+        ), error.code or 500
