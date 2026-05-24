@@ -12,9 +12,11 @@ def create_app(
     ingest_event: IngestEvent,
     auth_verifier: SourceAuthVerifier,
     publisher: KafkaPublisher,
+    flask_app: Flask | None = None,
 ) -> Flask:
-    app = Flask(__name__)
-    setup_otel(app)
+    app = flask_app if flask_app is not None else Flask(__name__)
+    if flask_app is None:
+        setup_otel(app)
 
     app.config['ingest_event'] = ingest_event
     app.config['auth_verifier'] = auth_verifier

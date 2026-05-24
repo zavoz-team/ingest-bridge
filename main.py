@@ -1,9 +1,12 @@
 from datetime import datetime, timezone
 
+from flask import Flask
+
 from adapter.config.loader import load_config
 from adapter.flask.app import create_app
 from adapter.flask.auth import SourceAuthVerifier
-from domain.event import IngestEventEnvelope
+from adapter.kafka.producer import KafkaPublisher
+from adapter.otel.setup import setup_otel
 from usecase.ingest_event import IngestEvent
 
 
@@ -12,24 +15,19 @@ class _UtcTimeProvider:
         return datetime.now(tz=timezone.utc)
 
 
-class _StubKafkaPublisher:
-    def publish(self, envelope: IngestEventEnvelope) -> None:
-        raise NotImplementedError
-
-    def ready(self) -> bool:
-        return True
-
-
 def main() -> None:
     config = load_config()
 
+    flask_app = Flask(__name__)
+    setup_otel(flask_app)
+
     auth_verifier = SourceAuthVerifier(config.source_token)
     time_provider = _UtcTimeProvider()
-    publisher = _StubKafkaPublisher()
+    publisher = KafkaPublisher(config.kafka)
 
     ingest_event = IngestEvent(publisher=publisher, time_provider=time_provider)
 
-    app = create_app(ingest_event, auth_verifier, publisher)
+    app = create_app(ingest_event, auth_verifier, publisher, flask_app=flask_app)
     app.run(host=config.host, port=config.port)
 
 
