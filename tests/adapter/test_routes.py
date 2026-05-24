@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
 import pytest
-from flask import Flask
 
 from adapter.flask.app import create_app
 from adapter.flask.auth import SourceAuthVerifier
+from domain.error import PublishError
 from domain.event import IngestEventEnvelope
 from usecase.ingest_event import IngestEvent
 from usecase.interface import KafkaPublisher, TimeProvider
@@ -25,7 +25,6 @@ class FakePublisher(KafkaPublisher):
 
     def publish(self, envelope: IngestEventEnvelope) -> None:
         if self._should_fail:
-            from domain.error import PublishError
             raise PublishError('error')
         self.published.append(envelope)
 
@@ -39,6 +38,7 @@ def app_factory():
         auth = SourceAuthVerifier(TOKEN)
         uc = IngestEvent(publisher, FakeTimeProvider())
         return create_app(uc, auth, publisher)
+
     return _factory
 
 
